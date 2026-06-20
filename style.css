@@ -1,0 +1,43 @@
+body {
+  font-size: 1.125em;
+  letter-spacing: 0.06em;
+  padding: 2ch;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  right: 0;
+}
+
+p {
+  margin-bottom: 1.5em;
+}
+
+section {
+  width: 50%;
+}
+
+#logo {
+  font-size: 1.125em;
+  position: fixed;
+  bottom: 50%;
+  left: 20px;
+  line-height: 0.8;
+}
+
+.credit {
+  margin-top: 1em;
+}
+
+.names {
+  margin-left: 1em;
+}
+
+[lang="ko"] {
+  line-height: 1.175;
+}
+
+[lang="en"] {
+  line-height: 0.875;
+}
