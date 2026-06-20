@@ -1,28 +1,3 @@
-/*!
- * grep-typo.js
- * 한글/라틴 글자를 "한 글자씩 번갈아(alternate)" 다른 폰트로 적용. 의존성 없음.
- *
- * 사용법 1) 그냥 불러오기:
- *   <script src="grep-typo.js"></script>
- *
- * 사용법 2) 폰트/옵션 덮어쓰기 (불러오기 "전에" 설정):
- *   <script>
- *     window.GREP_TYPO = {
- *       observe: true,                 // 동적으로 추가되는 텍스트도 처리
- *       fonts: {
- *         ka:   "'제주명조', serif",     // 한글 A (짝수 번째)
- *         kb:   "'성동명조', sans-serif",// 한글 B (홀수 번째)
- *         ea:   "'Filosofia OT', serif",// 라틴 A
- *         eb:   "'Panoptica', serif",   // 라틴 B
- *         dash: "inherit",             // — – : ; -
- *       }
- *     };
- *   </script>
- *   <script src="grep-typo.js"></script>
- *
- * 특정 영역 제외: 해당 요소에 data-no-typo 속성을 넣으면 됨.
- * 수동 재실행: GrepTypo.apply(요소)
- */
 (function () {
   "use strict";
 
@@ -53,16 +28,70 @@
         ea: "filosofia-unicase, serif",
         eb: "panoptica, serif",
         dash: "inherit",
+        na: "cormorant-unicase, sans-serif",
+        nb: "loretta-display, serif",
       },
       USER.fonts,
     ),
+    weights: Object.assign(
+      {
+        ka: null,
+        kb: null,
+        ea: null,
+        eb: null,
+        dash: null,
+        na: "500",
+        nb: "400",
+      },
+      USER.weights,
+    ),
     sizes: Object.assign(
-      { ka: "90%", kb: "96%", ea: "70%", eb: "100%", dash: "100%" },
+      {
+        ka: "90%",
+        kb: "96%",
+        ea: "70%",
+        eb: "100%",
+        dash: "100%",
+        na: "108%",
+        nb: "104%",
+      },
       USER.sizes,
     ),
     baselines: Object.assign(
-      { ka: "0px", kb: "-1px", ea: "0px", eb: "0px", dash: "-1.5px" },
+      {
+        ka: "0px",
+        kb: "-1px",
+        ea: "0px",
+        eb: "0px",
+        dash: "-1.5px",
+        na: "0px",
+        nb: "0px",
+      },
       USER.baselines,
+    ),
+    letterSpacings: Object.assign(
+      {
+        ka: null,
+        kb: null,
+        ea: "0.086em",
+        eb: null,
+        dash: null,
+        na: null,
+        nb: null,
+      },
+      USER.letterSpacings,
+    ),
+    obliqueLetterSpacings: Object.assign(
+      {
+        ka: null,
+        kb: null,
+        ea: "0.15em",
+        eb: "0.0em",
+        dash: null,
+        na: null,
+        nb: null,
+      },
+      USER.obliqueLetterSpacings,
     ),
     faces:
       USER.faces !== undefined
@@ -92,12 +121,16 @@
   var reLatin = /[A-Za-zÀ-ɏ]/; // 기본 라틴 + 악센트(é à ü ñ 등)
   var reDash = /[\u2014\u2013:;\u002D]/; // — – : ; -
   var reHspace = /[ \t]/; // \h
+  var reNum = /[0-9]/;
 
   /* ---- CSS 주입 ---- */
   function injectStyle() {
     var f = cfg.fonts,
+      wt = cfg.weights,
       sz = cfg.sizes,
-      bl = cfg.baselines;
+      bl = cfg.baselines,
+      ls = cfg.letterSpacings,
+      ols = cfg.obliqueLetterSpacings;
     var css = "";
     cfg.faces.forEach(function (face) {
       css +=
@@ -107,8 +140,8 @@
         face.src +
         ";font-weight:normal;font-style:normal;}";
     });
-    ["ka", "kb", "ea", "eb", "dash"].forEach(function (k) {
-      css +=
+    ["ka", "kb", "ea", "eb", "dash", "na", "nb"].forEach(function (k) {
+      var rule =
         ".gt-" +
         k +
         "{font-family:" +
@@ -116,8 +149,13 @@
         ";font-size:" +
         sz[k] +
         ";vertical-align:" +
-        bl[k] +
-        "}";
+        bl[k];
+      if (wt[k]) rule += ";font-weight:" + wt[k];
+      if (ls[k]) rule += ";letter-spacing:" + ls[k];
+      css += rule + "}";
+    });
+    Object.keys(ols).forEach(function (k) {
+      if (ols[k]) css += "i .gt-" + k + "{letter-spacing:" + ols[k] + "}";
     });
 
     if (cfg.applyBase) {
@@ -188,6 +226,13 @@
         cls = "gt-dash";
         runScript = null;
         idx = 0; // run 리셋
+      } else if (reNum.test(ch)) {
+        if (runScript !== "n") {
+          runScript = "n";
+          idx = 0;
+        }
+        cls = idx % 2 === 0 ? "gt-na" : "gt-nb";
+        idx++;
       } else if (reHspace.test(ch)) {
         cls = null; // 공백: 교대 유지
       } else {

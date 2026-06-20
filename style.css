@@ -10,6 +10,19 @@ body {
   right: 0;
 }
 
+[lang="ko"] {
+  line-height: 1.15;
+}
+
+[lang="en"] {
+  line-height: 0.875;
+}
+
+i {
+  display: inline-block;
+  transform: oblique;
+}
+
 p {
   margin-bottom: 1.5em;
 }
@@ -21,9 +34,15 @@ section {
 #logo {
   font-size: 1.125em;
   position: fixed;
-  bottom: 50%;
+  top: 30%;
   left: 20px;
+  display: flex;
   line-height: 0.8;
+}
+
+#works-sample {
+  padding-left: 1em;
+  font-size: 0.8em;
 }
 
 .credit {
@@ -32,12 +51,4 @@ section {
 
 .names {
   margin-left: 1em;
-}
-
-[lang="ko"] {
-  line-height: 1.175;
-}
-
-[lang="en"] {
-  line-height: 0.875;
 }
